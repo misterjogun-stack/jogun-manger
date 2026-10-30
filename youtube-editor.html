@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>CUT · 나만의 유튜브 편집기</title>
+<title>CUT · AI 자동 유튜브 편집기</title>
 <meta name="theme-color" content="#0F0F12">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Crect width='64' height='64' rx='14' fill='%23FF4747'/%3E%3Cpath d='M25 20 L46 32 L25 44 Z' fill='white'/%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Black+Han+Sans&family=Jua&family=Do+Hyeon&display=swap" rel="stylesheet">
@@ -159,6 +159,29 @@ svg{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:
 .mbox video{width:100%;border-radius:8px;background:#000;max-height:260px}
 .keys{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:12px}
 .keys kbd{background:var(--surface3);border:1px solid var(--border2);border-radius:4px;padding:1px 6px;font-family:inherit;font-size:11px;white-space:nowrap;justify-self:start}
+.btn.au{background:linear-gradient(135deg,#7C5CFF,#FF4D8D);border-color:transparent;color:#fff}
+.btn.au:hover{filter:brightness(1.08)}
+.cta{margin:0 12px 12px}
+.mbox.wide{width:min(580px,100%)}
+.tabs{display:flex;gap:4px;background:var(--surface2);padding:4px;border-radius:10px;margin-bottom:14px}
+.tabs button{flex:1;height:32px;border:0;border-radius:7px;background:transparent;cursor:pointer;font-weight:500;color:var(--ink2);font-size:12px}
+.tabs button.on{background:var(--surface3);color:var(--ink)}
+.opt{border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px}
+.opt>.chk{margin:0;color:var(--ink);font-weight:500;font-size:13px}
+.opt .desc{font-size:11px;color:var(--ink3);padding-left:22px}
+.opt .sub{margin-top:10px;padding-left:22px}
+.opt .sub .fld{margin-bottom:4px}
+.mini{font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--ink3);margin:6px 0 8px}
+.pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:6px;max-height:190px;overflow:auto}
+.pick label{position:relative;border-radius:6px;overflow:hidden;aspect-ratio:16/9;background:#000 center/cover;cursor:pointer;border:2px solid transparent}
+.pick label:has(input:checked){border-color:var(--accent)}
+.pick input{position:absolute;left:4px;top:4px;accent-color:var(--accent)}
+.pick span{position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);color:#fff;font-size:10px;padding:1px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.steps{font-size:12px;line-height:1.9;color:var(--ink2);max-height:220px;overflow:auto}
+.steps .ok{color:var(--ink)}
+.steps .ok:before{content:'✓ ';color:var(--ca);font-weight:700}
+.steps .err{color:var(--accent)}
+.steps .run:before{content:'… ';color:var(--ink3)}
 #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:20px;font-size:12px;font-weight:500;opacity:0;pointer-events:none;transition:.25s;z-index:300;max-width:90vw;text-align:center}
 #toast.on{opacity:1;transform:translateX(-50%)}
 
@@ -167,7 +190,7 @@ svg{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:
   .app{height:auto;grid-template-columns:minmax(0,1fr);grid-template-rows:auto;grid-template-areas:"top" "view" "tl" "insp" "lib"}
   .top{position:sticky;top:0;z-index:50;height:52px;overflow-x:auto}
   #title{width:120px}
-  #saved,.hide-m{display:none}
+  #saved,.hide-m,#bThumb{display:none}
   .view{height:min(62vw,60vh);padding:10px}
   .tl{height:300px}
   .insp,.lib{border:0;border-top:1px solid var(--border)}
@@ -187,6 +210,7 @@ svg{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:
     <span id="saved"></span>
     <button class="btn ic" id="bTheme" title="밝게/어둡게"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button>
     <button class="btn ic" id="bHelp" title="단축키">?</button>
+    <button class="btn au" id="bAuto" title="무음 컷 · AI 자막 · 배경음악을 자동으로"><svg viewBox="0 0 24 24"><path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg>자동 편집</button>
     <button class="btn" id="bThumb" title="현재 화면을 썸네일 이미지로 저장"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-8 8"/></svg><span class="hide-m">썸네일</span></button>
     <button class="btn pri" id="bExport"><svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>내보내기</button>
   </header>
@@ -195,6 +219,7 @@ svg{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:
     <div class="ph-title">미디어</div>
     <div class="drop" id="drop"><b>파일 불러오기</b>영상 · 사진 · 음악을 끌어다 놓거나 클릭</div>
     <input type="file" id="file" accept="video/*,audio/*,image/*" multiple hidden>
+    <div class="cta"><button class="btn au full" id="bAuto2"><svg viewBox="0 0 24 24"><path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9z"/></svg>자동 편집 시작</button></div>
     <div class="mlist" id="mlist"></div>
     <div class="tips">
       <kbd>Space</kbd> 재생 · <kbd>S</kbd> 자르기 · <kbd>T</kbd> 자막<br>
@@ -205,7 +230,7 @@ svg{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:
 
   <main class="view" id="view">
     <canvas id="cv" width="1920" height="1080"></canvas>
-    <div class="empty" id="empty"><div><b>나만의 유튜브 편집기</b>왼쪽에서 영상을 불러온 뒤 <b style="display:inline;font-size:13px">+ 추가</b>를 누르거나<br>아래 타임라인으로 끌어다 놓으세요</div></div>
+    <div class="empty" id="empty"><div><b>AI 자동 유튜브 편집기</b>영상을 불러오고 <b style="display:inline;font-size:13px">자동 편집</b>을 누르면<br>무음 컷 · 자막 · 배경음악 · 타이틀까지 알아서 만들어요</div></div>
   </main>
 
   <aside class="insp" id="insp"></aside>
@@ -253,6 +278,70 @@ svg{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:
       <video id="exVid" controls playsinline></video>
       <p class="note" id="exInfo" style="margin-top:8px"></p>
       <div class="acts"><button class="btn" data-close>닫기</button><a class="btn pri" id="exDl" download>다운로드</a></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="mAuto" hidden>
+  <div class="mbox wide">
+    <h3>자동 편집</h3>
+    <div id="auSetup">
+      <div class="tabs"><button class="on" data-tab="one">원클릭 자동 편집</button><button data-tab="beat">음악 박자 몽타주</button><button data-tab="short">쇼츠 자동 만들기</button></div>
+      <div data-pane="one">
+        <p class="note">불러온 영상을 파일 이름 순서로 이어 붙인 뒤 아래 작업을 한 번에 처리해요. 결과가 마음에 안 들면 Ctrl+Z 한 번으로 되돌릴 수 있어요.</p>
+        <div class="opt"><label class="chk"><input type="checkbox" id="auCut" checked>말 없는 구간 자동 컷</label><div class="desc">멈칫하거나 숨 고르는 구간을 잘라 템포를 빠르게 만들어요</div>
+          <div class="sub g2">
+            <label class="fld"><span>컷 강도<output>보통</output></span><input type="range" id="auStr" min="0" max="1" step="0.05" value="0.5" data-lv="약하게,조금 약하게,보통,조금 강하게,강하게"></label>
+            <label class="fld"><span>자를 최소 무음<output>0.5초</output></span><input type="range" id="auMin" min="0.2" max="2" step="0.1" value="0.5" data-unit="초"></label>
+          </div>
+          <div class="sub"><label class="fld"><span>말 앞뒤 여유<output>0.15초</output></span><input type="range" id="auPad" min="0" max="0.5" step="0.05" value="0.15" data-unit="초"></label></div>
+        </div>
+        <div class="opt"><label class="chk"><input type="checkbox" id="auSub" checked>AI 자동 자막</label><div class="desc">말소리를 받아 적어 자막을 달아요. 처음 한 번은 AI 모델을 내려받아요(인터넷 필요, 이후엔 저장된 모델 사용)</div>
+          <div class="sub g2">
+            <label class="fld"><span>정확도</span><select id="auModel"><option value="onnx-community/whisper-small">정확하게 (약 250MB)</option><option value="onnx-community/whisper-base">빠르게 (약 80MB)</option></select></label>
+            <label class="fld"><span>언어</span><select id="auLang"><option value="korean">한국어</option><option value="english">영어</option><option value="japanese">일본어</option><option value="">자동 감지</option></select></label>
+          </div>
+          <div class="sub"><label class="fld"><span>자막 스타일</span><select id="auStyle"><option value="sub">기본 자막 (흰 글씨 + 검은 테두리)</option><option value="box">박스 자막</option><option value="fun">예능 자막</option></select></label></div>
+        </div>
+        <div class="opt"><label class="chk"><input type="checkbox" id="auMusic">배경음악 깔기</label><div class="desc">음악이 짧으면 반복하고, 말할 때는 음악 소리를 자동으로 줄여요</div>
+          <div class="sub g2">
+            <label class="fld"><span>음악</span><select id="auMusicSel" class="musicSel"></select></label>
+            <label class="fld"><span>음악 볼륨<output>35%</output></span><input type="range" id="auMusicVol" min="0.05" max="1" step="0.05" value="0.35" data-pct="1"></label>
+          </div>
+        </div>
+        <div class="opt"><label class="chk"><input type="checkbox" id="auTitle" checked>인트로 타이틀</label>
+          <div class="sub"><label class="fld"><span>타이틀 문구 (비우면 프로젝트 제목)</span><input type="text" id="auTitleText" maxlength="40"></label></div></div>
+        <div class="opt"><label class="chk"><input type="checkbox" id="auFade" checked>클립 전환 페이드</label></div>
+        <div class="opt"><label class="chk"><input type="checkbox" id="auChap" checked>파일마다 유튜브 챕터 마커</label></div>
+        <label class="fld" style="margin-top:6px"><span>화면 비율</span><select id="auAspect"><option value="">지금 설정 유지</option><option value="16:9">16:9 유튜브 일반</option><option value="9:16">9:16 쇼츠 (꽉 채우기)</option></select></label>
+        <div class="acts"><button class="btn" data-close>취소</button><button class="btn pri" id="auGo">자동 편집 시작</button></div>
+      </div>
+      <div data-pane="beat" hidden>
+        <p class="note">사진과 영상을 음악 박자에 맞춰 자동으로 잘라 붙여요. 브이로그 인트로, 여행 몽타주에 좋아요. 지금 타임라인을 새 몽타주로 바꿔요.</p>
+        <div class="g2">
+          <label class="fld"><span>음악</span><select id="bmMusic" class="musicSel"></select></label>
+          <label class="fld"><span>컷 빠르기</span><select id="bmPace"><option value="auto">자동</option><option value="fast">빠르게</option><option value="slow">느리게</option></select></label>
+          <label class="fld"><span>길이</span><select id="bmLen"><option value="0">음악 전체</option><option value="15">15초</option><option value="30" selected>30초</option><option value="60">60초</option></select></label>
+          <label class="fld"><span>화면 비율</span><select id="bmAspect"><option value="">지금 설정 유지</option><option value="16:9">16:9</option><option value="9:16">9:16 쇼츠</option></select></label>
+        </div>
+        <label class="chk"><input type="checkbox" id="bmMute" checked>영상 원래 소리 끄기 (음악만)</label>
+        <h4 class="mini">사용할 사진 · 영상</h4>
+        <div class="pick" id="bmList"></div>
+        <div class="acts"><button class="btn" data-close>취소</button><button class="btn pri" id="bmGo">몽타주 만들기</button></div>
+      </div>
+      <div data-pane="short" hidden>
+        <p class="note">지금 타임라인에서 말이 가장 많이 몰린 구간을 찾아 세로 쇼츠로 바꿔요. 자동 편집(무음 컷·자막)을 먼저 하면 더 좋아요.</p>
+        <div class="g2">
+          <label class="fld"><span>쇼츠 길이</span><select id="shLen"><option value="15">15초</option><option value="30">30초</option><option value="45">45초</option><option value="60" selected>60초</option></select></label>
+          <label class="fld"><span>상단 제목</span><input type="text" id="shTitle" maxlength="30" placeholder="비우면 넣지 않아요"></label>
+        </div>
+        <div class="acts"><button class="btn" data-close>취소</button><button class="btn pri" id="shGo">쇼츠 만들기</button></div>
+      </div>
+    </div>
+    <div id="auRun" hidden>
+      <div class="bar"><i id="auBar"></i></div>
+      <div class="steps" id="auSteps"></div>
+      <div class="acts"><button class="btn pri" id="auDone" disabled>결과 보기</button></div>
     </div>
   </div>
 </div>
@@ -403,7 +492,7 @@ async function realDuration(el) {
   const d = isFinite(el.duration) ? el.duration : 0; el.currentTime = 0; return d;
 }
 async function loadMedia(id, blob, name, type) {
-  const url = URL.createObjectURL(blob), r = { url };
+  const url = URL.createObjectURL(blob), r = { url, blob };
   const meta = { id, name, type, duration: 0, w: 0, h: 0 };
   if (type === 'image') {
     const img = new Image(); img.src = url; await img.decode();
@@ -446,7 +535,10 @@ async function importFiles(files) {
     catch (e) { toast(`이 브라우저에서 열 수 없는 파일이에요: ${f.name}`); continue; }
     DB.put('files', { id, blob: f, name: f.name, type }).catch(() => toast('저장 공간이 부족해 이 파일은 새로고침 후 복구되지 않아요'));
   }
-  if (n) { toast(`${n}개 파일을 불러왔어요`); renderLib(); queueSave(); }
+  if (n) {
+    toast(`${n}개 파일을 불러왔어요`); renderLib(); queueSave();
+    if (!S.clips.length && !autoOffered && Object.values(S.media).some(m => m.type === 'video')) { autoOffered = true; openAuto('one'); }
+  }
 }
 function addToTimeline(mid, opts = {}) {
   const m = S.media[mid]; if (!m) return;
@@ -511,7 +603,17 @@ function pause() { playing = false; for (const k in EL) if (!EL[k].img) EL[k].el
 function seek(t) { T = clamp(t, 0, total()); }
 function updPlay() { $('#bPlay').innerHTML = playing ? ICON.pause : ICON.play; }
 
+let DUCK = 1;
+function voiceNow(act) {
+  if (!act || isImg(act.c) || act.c.volume < 0.05) return false;
+  const sp = (S.media[act.c.mediaId] || {}).speech; if (!sp) return true;
+  const t = act.c.in + (T - act.s) * act.c.speed;
+  let lo = 0, hi = sp.length - 1;
+  while (lo <= hi) { const mid = (lo + hi) >> 1; if (sp[mid][1] < t) lo = mid + 1; else if (sp[mid][0] > t) hi = mid - 1; else return true; }
+  return false;
+}
 function syncMedia(L, act) {
+  DUCK += ((voiceNow(act) ? 0.3 : 1) - DUCK) * 0.12;
   const ai = act ? L.indexOf(act) : -1, next = L[ai + 1] || (ai < 0 ? L.find(x => x.s > T) : null);
   for (const x of L) {
     const o = EL[x.c.id]; if (!o || o.img) continue;
@@ -542,6 +644,7 @@ function syncMedia(L, act) {
       let v = a.volume;
       if (a.fadeIn) v *= clamp(rel / 2, 0, 1);
       if (a.fadeOut) v *= clamp((len - rel) / 2, 0, 1);
+      if (a.duck) v *= DUCK;
       setVol(o, v);
     } else if (!el.paused) el.pause();
   }
@@ -901,7 +1004,7 @@ function renderInspector() {
       ${rng('volume', '볼륨', it.volume, 0, 2, 0.05, 'pct')}
       <div class="g2">${num('start', '시작 위치(초)', it.start)}${num('in', '원본 시작점', it.in)}</div>
       ${num('out', '원본 끝점', it.out)}
-      ${chk('fadeIn', '페이드 인 (2초)', it.fadeIn)}${chk('fadeOut', '페이드 아웃 (2초)', it.fadeOut)}
+      ${chk('fadeIn', '페이드 인 (2초)', it.fadeIn)}${chk('fadeOut', '페이드 아웃 (2초)', it.fadeOut)}${chk('duck', '말할 때 자동으로 줄이기', it.duck)}
       <p class="note">배경음악은 보통 볼륨 20~40%가 목소리를 가리지 않아요.</p>
       <div class="row-btns"><button class="btn sm" data-act="fitAudio">영상 길이에 맞추기</button></div>
       <div class="row-btns" style="margin-top:6px"><button class="btn sm" data-act="split">자르기</button><button class="btn sm" data-act="dup">복제</button><button class="btn sm dan" data-act="del">삭제</button></div>
@@ -1099,6 +1202,385 @@ function finishExport() { if (EXP && EXP.rec.state !== 'inactive') EXP.rec.stop(
 $('#exGo').onclick = startExport;
 $('#exCancel').onclick = () => { if (!EXP) return; EXP.cancelled = true; pause(); finishExport(); };
 
+/* ---------- AUTO EDIT ENGINE ---------- */
+let autoOffered = false;
+const AN = {};   // mediaId -> { pcm(16kHz mono), sr, db(20ms frames) }
+const baseName = n => n.replace(/\.[^.]+$/, '');
+async function analyzeAudio(mid) {
+  if (AN[mid] !== undefined) return AN[mid];
+  const m = S.media[mid], r = MR[mid];
+  if (!m || m.type === 'image' || !r || !r.blob) return (AN[mid] = null);
+  try {
+    const oc = new OfflineAudioContext(1, 16000, 16000);
+    const ab = await oc.decodeAudioData(await r.blob.arrayBuffer());
+    const n = ab.length, pcm = new Float32Array(n);
+    for (let c = 0; c < ab.numberOfChannels; c++) { const d = ab.getChannelData(c); for (let i = 0; i < n; i++) pcm[i] += d[i] / ab.numberOfChannels; }
+    const hop = 320, db = new Float32Array(Math.floor(n / hop));
+    for (let f = 0; f < db.length; f++) { let e = 0; for (let i = f * hop, z = i + hop; i < z; i++) e += pcm[i] * pcm[i]; db[f] = 10 * Math.log10(e / hop + 1e-10); }
+    return (AN[mid] = { pcm, sr: 16000, db, hop: 0.02 });
+  } catch (e) { return (AN[mid] = null); }   // no audio track
+}
+function pct(arr, p) { const a = Array.from(arr).sort((x, y) => x - y); return a[Math.min(a.length - 1, Math.floor(p * a.length))]; }
+function speechSegs(an, strength = 0.5, minSil = 0.5, padS = 0.15) {
+  const db = an.db, dur = an.pcm.length / an.sr;
+  if (!db.length) return [];
+  const floor = pct(db, 0.1), peak = pct(db, 0.98);
+  if (peak < -55) return [];                              // effectively silent
+  if (peak - floor < 10) return [[0, dur]];                // constant sound, nothing to cut
+  const th = floor + (peak - floor) * (0.18 + 0.32 * strength);
+  let segs = [], st = -1;
+  for (let i = 0; i <= db.length; i++) {
+    const on = i < db.length && db[i] > th;
+    if (on && st < 0) st = i;
+    if (!on && st >= 0) { segs.push([st * an.hop, i * an.hop]); st = -1; }
+  }
+  const merged = [];
+  for (const s of segs) { const l = merged[merged.length - 1]; if (l && s[0] - l[1] < minSil) l[1] = s[1]; else merged.push([...s]); }
+  const out = [];
+  for (const [a, b] of merged) {
+    if (b - a < 0.2) continue;
+    const s = [Math.max(0, a - padS), Math.min(dur, b + padS)];
+    const l = out[out.length - 1]; if (l && s[0] <= l[1]) l[1] = s[1]; else out.push(s);
+  }
+  return out.map(([a, b]) => [Math.round(a * 100) / 100, Math.round(b * 100) / 100]);
+}
+function cutSilence() {
+  let removed = 0; const out = [];
+  for (const c of S.clips) {
+    const m = S.media[c.mediaId], sp = m && m.speech;
+    if (isImg(c) || !sp || !sp.length) { out.push(c); continue; }
+    const parts = sp.map(([a, b]) => [Math.max(a, c.in), Math.min(b, c.out)]).filter(([a, b]) => b - a > 0.1);
+    if (!parts.length) { out.push(c); continue; }
+    const kept = parts.reduce((n, [a, b]) => n + b - a, 0); removed += (c.out - c.in - kept) / c.speed;
+    parts.forEach(([a, b], i) => out.push({ ...c, id: i === 0 ? c.id : uid(), in: a, out: b }));
+  }
+  S.clips = out; return removed;
+}
+
+/* Whisper speech-to-text in a module worker (transformers.js, model cached by the browser) */
+const TJS = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1/dist/transformers.min.js';
+const WORKER_SRC = `
+import { pipeline, env } from '${TJS}';
+env.allowLocalModels = false;
+let asr = null, cur = null;
+async function load(model, progress) {
+  let gpu = false;
+  try { gpu = !!(navigator.gpu && await navigator.gpu.requestAdapter()); } catch (e) {}
+  if (gpu) {
+    try { return await pipeline('automatic-speech-recognition', model, { device: 'webgpu', dtype: { encoder_model: 'fp32', decoder_model_merged: 'q4' }, progress_callback: progress }); } catch (e) {}
+  }
+  return await pipeline('automatic-speech-recognition', model, { device: 'wasm', dtype: 'q8', progress_callback: progress });
+}
+self.onmessage = async (e) => {
+  const { id, model, pcm, language } = e.data;
+  try {
+    if (!asr || cur !== model) { asr = await load(model, p => self.postMessage({ id, type: 'load', p })); cur = model; }
+    self.postMessage({ id, type: 'run' });
+    const out = await asr(pcm, { language: language || null, task: 'transcribe', return_timestamps: true, chunk_length_s: 30, stride_length_s: 5 });
+    self.postMessage({ id, type: 'done', chunks: out.chunks || [{ timestamp: [0, pcm.length / 16000], text: out.text }] });
+  } catch (err) { self.postMessage({ id, type: 'error', msg: String((err && err.message) || err) }); }
+};`;
+let ASRW = null; const ASRJ = {};
+function asrWorker() {
+  if (ASRW) return ASRW;
+  ASRW = new Worker(URL.createObjectURL(new Blob([WORKER_SRC], { type: 'text/javascript' })), { type: 'module' });
+  ASRW.onmessage = e => { const j = ASRJ[e.data.id]; if (j) j(e.data); };
+  ASRW.onerror = e => { for (const k in ASRJ) ASRJ[k]({ type: 'error', msg: e.message || 'AI 모듈을 불러오지 못했어요' }); ASRW = null; };
+  return ASRW;
+}
+function transcribePCM(pcm, model, language, onEvent) {
+  return new Promise((res, rej) => {
+    const id = uid(), files = {};
+    ASRJ[id] = d => {
+      if (d.type === 'load' && d.p && d.p.status === 'progress' && d.p.total) {
+        files[d.p.file] = [d.p.loaded, d.p.total];
+        const v = Object.values(files), l = v.reduce((a, x) => a + x[0], 0), t = v.reduce((a, x) => a + x[1], 0);
+        onEvent('load', l / t, t);
+      } else if (d.type === 'run') onEvent('run');
+      else if (d.type === 'done') { delete ASRJ[id]; res(d.chunks); }
+      else if (d.type === 'error') { delete ASRJ[id]; rej(new Error(d.msg)); }
+    };
+    asrWorker().postMessage({ id, model, pcm, language }, [pcm.buffer]);
+  });
+}
+// Only speech parts are sent to the model (less waiting, fewer hallucinations on silence/music)
+function speechOnly(an, segs) {
+  if (!segs || !segs.length) return { pcm: an.pcm.slice(), map: null };
+  const sr = an.sr, gap = Math.round(0.3 * sr);
+  let len = 0; segs.forEach(([a, b]) => len += Math.round((b - a) * sr) + gap);
+  const pcm = new Float32Array(len), map = []; let o = 0;
+  segs.forEach(([a, b]) => {
+    const s0 = Math.round(a * sr), n = Math.max(0, Math.min(Math.round((b - a) * sr), an.pcm.length - s0));
+    pcm.set(an.pcm.subarray(s0, s0 + n), o); map.push({ d: o / sr, s: a, len: n / sr }); o += n + gap;
+  });
+  return { pcm: pcm.slice(0, o), map };
+}
+function unmap(map, t) {
+  if (!map) return t;
+  let p = map[0]; for (const q of map) { if (q.d <= t + 1e-6) p = q; else break; }
+  return p.s + clamp(t - p.d, 0, p.len);
+}
+const HALLU = /^(시청해\s?주셔서 감사합니다|구독과 좋아요|MBC 뉴스|자막 제공|감사합니다)[.!\s]*$/;
+function cleanChunks(chunks, map, dur) {
+  return chunks.map(c => {
+    const a = c.timestamp[0] || 0, b = c.timestamp[1] == null ? a + 3 : c.timestamp[1];
+    const s = unmap(map, a), e = Math.min(dur, Math.max(unmap(map, b), s + 0.3));
+    return { s: Math.round(s * 100) / 100, e: Math.round(e * 100) / 100, text: (c.text || '').trim() };
+  }).filter(c => c.text && !HALLU.test(c.text));
+}
+function buildCaptions(styleKey) {
+  S.texts = S.texts.filter(t => !t.autoSub);
+  const st = { ...TDEF, ...TPRE[styleKey] }; delete st.label;
+  const maxC = S.set.aspect === '9:16' ? 12 : 18, add = [];
+  for (const x of layout()) {
+    const c = x.c, m = S.media[c.mediaId]; if (!m || !m.transcript) continue;
+    const words = [];
+    m.transcript.forEach((seg, si) => {
+      const ws = seg.text.split(/\s+/).filter(Boolean), tot = ws.reduce((n, w) => n + w.length, 0) || 1; let acc = 0;
+      ws.forEach(w => { const t0 = seg.s + (seg.e - seg.s) * acc / tot; acc += w.length; words.push({ w, t0, t1: seg.s + (seg.e - seg.s) * acc / tot, si }); });
+    });
+    const inClip = words.filter(w => (w.t0 + w.t1) / 2 >= c.in && (w.t0 + w.t1) / 2 <= c.out);
+    let g = [];
+    const flush = () => {
+      if (!g.length) return;
+      const a = Math.max(g[0].t0, c.in), b = Math.min(g[g.length - 1].t1, c.out);
+      const ts = x.s + (a - c.in) / c.speed, te = x.s + (b - c.in) / c.speed;
+      add.push({ ...st, id: uid(), text: g.map(w => w.w).join(' '), start: ts, dur: Math.max(0.4, te - ts), anim: 'none', autoSub: true });
+      g = [];
+    };
+    for (const w of inClip) {
+      const len = g.reduce((n, q) => n + q.w.length + 1, 0);
+      if (g.length && (len + w.w.length > maxC || w.si !== g[g.length - 1].si)) flush();
+      g.push(w);
+    }
+    flush();
+  }
+  add.sort((a, b) => a.start - b.start);
+  for (let i = 0; i < add.length - 1; i++) if (add[i].start + add[i].dur > add[i + 1].start) add[i].dur = Math.max(0.2, add[i + 1].start - add[i].start);
+  S.texts.push(...add);
+  return add.length;
+}
+function placeMusic(mid, vol, end) {
+  S.audios = S.audios.filter(a => !a.auto);
+  const md = S.media[mid].duration; let t = 0;
+  while (t < end - 0.3) {
+    const len = Math.min(md, end - t), last = t + len >= end - 0.01;
+    S.audios.push({ id: uid(), mediaId: mid, start: t, in: 0, out: len, volume: vol, fadeIn: false, fadeOut: last, duck: true, auto: true });
+    t += len;
+  }
+}
+
+/* beat tracking: onset envelope (100 fps) -> autocorrelation tempo -> phase -> snap */
+function beatGrid(an) {
+  const hop = 160, n = Math.floor(an.pcm.length / hop), env = new Float32Array(n);
+  let prev = 0;
+  for (let i = 0; i < n; i++) { let e = 0; for (let j = i * hop, z = j + hop; j < z; j++) e += an.pcm[j] * an.pcm[j]; const l = Math.log(1e-9 + e); env[i] = Math.max(0, l - prev); prev = l; }
+  const ac = lag => { let s = 0; for (let i = 0; i + lag < n; i++) s += env[i] * env[i + lag]; return s / Math.max(1, n - lag); };
+  let bl = 50, bs = -1; const sc = {};
+  for (let lag = 30; lag <= 105; lag++) { const bpm = 6000 / lag, w = Math.exp(-0.5 * Math.pow(Math.log2(bpm / 115) / 0.8, 2)); sc[lag] = ac(lag); if (sc[lag] * w > bs) { bs = sc[lag] * w; bl = lag; } }
+  const a = sc[bl - 1] || sc[bl], b = sc[bl + 1] || sc[bl], den = a - 2 * sc[bl] + b;
+  const lag = bl + (den ? clamp(0.5 * (a - b) / den, -0.5, 0.5) : 0);
+  let bo = 0, bp = -1;
+  for (let o = 0; o < lag; o++) { let s = 0; for (let t = o; t < n; t += lag) s += env[Math.round(t)] || 0; if (s > bp) { bp = s; bo = o; } }
+  const times = [];
+  for (let t = bo; t < n; t += lag) {
+    let k = Math.round(t), best = k;
+    for (let j = k - 3; j <= k + 3; j++) if (env[j] > (env[best] || 0)) best = j;
+    times.push(best / 100);
+  }
+  return { bpm: 6000 / lag, period: lag / 100, times };
+}
+
+/* ---------- AUTO EDIT UI ---------- */
+function openAuto(tab = 'one') {
+  pause();
+  const music = Object.values(S.media).filter(m => m.type === 'audio');
+  document.querySelectorAll('.musicSel').forEach(sl => {
+    sl.innerHTML = music.length ? music.map(m => `<option value="${m.id}">${esc(m.name)}</option>`).join('') : '<option value="">음악 파일을 먼저 불러오세요</option>';
+  });
+  $('#auMusic').checked = music.length > 0; $('#auMusic').disabled = !music.length;
+  $('#auTitleText').placeholder = autoTitle();
+  const vis = Object.values(S.media).filter(m => m.type !== 'audio');
+  $('#bmList').innerHTML = vis.length ? vis.map(m => `<label style="background-image:url('${(MR[m.id] || {}).thumb || ''}')"><input type="checkbox" value="${m.id}" checked><span>${esc(m.name)}</span></label>`).join('')
+    : '<p class="note">사진이나 영상을 먼저 불러오세요</p>';
+  $('#auSetup').hidden = false; $('#auRun').hidden = true; setTab(tab);
+  $('#mAuto').hidden = false;
+}
+function setTab(t) {
+  document.querySelectorAll('#mAuto [data-tab]').forEach(b => b.classList.toggle('on', b.dataset.tab === t));
+  document.querySelectorAll('#mAuto [data-pane]').forEach(p => p.hidden = p.dataset.pane !== t);
+}
+document.querySelectorAll('#mAuto [data-tab]').forEach(b => b.onclick = () => setTab(b.dataset.tab));
+$('#mAuto').addEventListener('input', e => {
+  const r = e.target; if (r.type !== 'range') return;
+  const o = r.parentElement.querySelector('output'); if (!o) return;
+  if (r.dataset.lv) { const lv = r.dataset.lv.split(','); o.textContent = lv[Math.round(+r.value * (lv.length - 1))]; }
+  else if (r.dataset.pct) o.textContent = Math.round(r.value * 100) + '%';
+  else o.textContent = (+r.value).toFixed(2).replace(/0$/, '') + (r.dataset.unit || '');
+});
+function autoTitle() {
+  if (S.set.title && S.set.title !== '새 프로젝트') return S.set.title;
+  const v = Object.values(S.media).find(m => m.type === 'video'); return v ? baseName(v.name) : '나의 영상';
+}
+const AU = {
+  start() { $('#auSetup').hidden = true; $('#auRun').hidden = false; $('#auSteps').innerHTML = ''; $('#auDone').disabled = true; this.bar(0); },
+  log(msg, cls = 'run') { const d = document.createElement('div'); d.className = cls; d.textContent = msg; $('#auSteps').appendChild(d); d.scrollIntoView({ block: 'nearest' }); return d; },
+  ok(d, msg) { d.className = 'ok'; if (msg) d.textContent = msg; },
+  err(d, msg) { d.className = 'err'; d.textContent = msg; },
+  bar(p) { $('#auBar').style.width = (clamp(p, 0, 1) * 100) + '%'; },
+  end(msg) { this.bar(1); this.log(msg, 'ok'); $('#auDone').disabled = false; T = 0; syncEls(); renderAll(); queueSave(); },
+};
+$('#auDone').onclick = () => { $('#mAuto').hidden = true; play(); };
+const tick0 = () => new Promise(r => setTimeout(r, 0));
+
+async function runAutoEdit() {
+  const vids = Object.values(S.media).filter(m => m.type === 'video').sort((a, b) => a.name.localeCompare(b.name, 'ko', { numeric: true }));
+  if (!S.clips.length && !vids.length) return toast('먼저 영상을 불러오세요');
+  const o = { cut: $('#auCut').checked, str: +$('#auStr').value, min: +$('#auMin').value, pad: +$('#auPad').value,
+    sub: $('#auSub').checked, model: $('#auModel').value, lang: $('#auLang').value, style: $('#auStyle').value,
+    music: $('#auMusic').checked && $('#auMusicSel').value, vol: +$('#auMusicVol').value,
+    title: $('#auTitle').checked, titleText: $('#auTitleText').value.trim() || autoTitle(),
+    fade: $('#auFade').checked, chap: $('#auChap').checked, aspect: $('#auAspect').value };
+  AU.start(); hist();
+  if (o.aspect) { S.set.aspect = o.aspect; S.set.fit = o.aspect === '9:16' ? 'cover' : 'contain'; }
+  let d;
+  if (!S.clips.length) {
+    d = AU.log('영상을 순서대로 타임라인에 올리는 중');
+    vids.forEach(m => S.clips.push({ id: uid(), mediaId: m.id, in: 0, out: m.duration, speed: 1, volume: 1, br: 1, ct: 1, sat: 1, gray: 0, sepia: 0, hue: 0, zoom: false }));
+    AU.ok(d, `영상 ${vids.length}개를 이어 붙였어요`);
+  }
+  const used = [...new Set(S.clips.map(c => c.mediaId))].filter(id => S.media[id] && S.media[id].type === 'video');
+  d = AU.log('소리 분석 중');
+  for (let i = 0; i < used.length; i++) {
+    const an = await analyzeAudio(used[i]);
+    if (an) S.media[used[i]].speech = speechSegs(an, o.str, o.min, o.pad);
+    AU.bar(0.15 * (i + 1) / used.length); await tick0();
+  }
+  AU.ok(d, '소리 분석 완료');
+  if (o.cut) {
+    d = AU.log('말 없는 구간 자르는 중');
+    const before = layout().length, rm = cutSilence();
+    AU.ok(d, rm > 0.5 ? `말 없는 구간 ${fmt(rm)} 분량을 잘라냈어요 (클립 ${before}개 → ${S.clips.length}개)` : '잘라낼 무음 구간이 거의 없었어요');
+  }
+  if (o.title) {
+    S.texts = S.texts.filter(t => !t.autoTitle);
+    const p = { ...TDEF, ...TPRE.title }; delete p.label;
+    S.texts.push({ ...p, id: uid(), text: o.titleText, start: 0, dur: 2.5, size: S.set.aspect === '9:16' ? 9 : 11, autoTitle: true });
+  }
+  if (o.fade) S.set.fade = true;
+  if (o.chap) {
+    S.markers = S.markers.filter(m => !m.auto); let last = null;
+    layout().forEach(x => { if (x.c.mediaId !== last) { last = x.c.mediaId; S.markers.push({ id: uid(), t: Math.floor(x.s), label: x.s < 1 ? '인트로' : baseName(S.media[last].name), auto: true }); } });
+  }
+  const videoEnd = () => { const L = layout(); return L.length ? L[L.length - 1].e : 0; };
+  if (o.music) { placeMusic(o.music, o.vol, videoEnd()); AU.log(`배경음악을 깔고 말할 때 자동으로 줄이도록 했어요`, 'ok'); }
+  syncEls(); renderAll(); AU.bar(0.3);
+  if (o.sub) {
+    const need = [...new Set(S.clips.map(c => c.mediaId))].filter(id => AN[id] && S.media[id].type === 'video');
+    let okAll = true;
+    for (let i = 0; i < need.length; i++) {
+      const m = S.media[need[i]];
+      const key = o.model + '|' + o.lang;
+      if (m.transcript && m.tkey === key) continue;
+      d = AU.log(`AI 자막 준비 중 (${i + 1}/${need.length}) ${m.name}`);
+      const t0 = Date.now(), timer = setInterval(() => { if (d.dataset.run) d.textContent = `AI가 받아 적는 중 (${i + 1}/${need.length}) ${m.name} · ${Math.round((Date.now() - t0) / 1000)}초`; }, 1000);
+      try {
+        const { pcm, map } = speechOnly(AN[need[i]], m.speech || speechSegs(AN[need[i]]));
+        const chunks = await transcribePCM(pcm, o.model, o.lang, (ev, p, tot) => {
+          if (ev === 'load') { d.textContent = `AI 모델 내려받는 중 ${Math.round(p * 100)}% (${(tot / 1048576).toFixed(0)}MB, 처음 한 번만)`; AU.bar(0.3 + 0.3 * p); }
+          else { d.dataset.run = 1; }
+        });
+        m.transcript = cleanChunks(chunks, map, m.duration); m.tkey = key;
+        AU.ok(d, `받아 적기 완료: ${m.name} (${m.transcript.length}문장)`);
+      } catch (e) {
+        okAll = false;
+        AU.err(d, /fetch|network|load/i.test(e.message) ? 'AI 모델을 내려받지 못했어요. 인터넷 연결을 확인한 뒤 다시 해 보세요. (자막 외 작업은 끝났어요)'
+          : `AI 자막을 만들지 못했어요: ${e.message}. 크롬 최신 버전에서 다시 해 보세요.`);
+        break;
+      } finally { clearInterval(timer); }
+      AU.bar(0.6 + 0.35 * (i + 1) / need.length);
+    }
+    const n = buildCaptions(o.style);
+    if (n) AU.log(`자막 ${n}개를 넣었어요`, 'ok'); else if (okAll) AU.log('받아 적을 말소리를 찾지 못했어요', 'err');
+  }
+  AU.end(`자동 편집 완료 · 총 ${fmt(total())}`);
+}
+
+async function runMontage() {
+  const mid = $('#bmMusic').value, picks = [...document.querySelectorAll('#bmList input:checked')].map(i => i.value);
+  if (!mid) return toast('음악 파일을 먼저 불러오세요');
+  if (!picks.length) return toast('사용할 사진이나 영상을 골라 주세요');
+  AU.start(); let d = AU.log('음악 박자 분석 중');
+  const an = await analyzeAudio(mid);
+  if (!an) { AU.err(d, '음악을 분석하지 못했어요'); $('#auDone').disabled = false; return; }
+  const bg = beatGrid(an); AU.ok(d, `템포 약 ${Math.round(bg.bpm)} BPM`); AU.bar(0.5);
+  let per = { fast: 1, slow: 4, auto: 2 }[$('#bmPace').value];
+  while (per * bg.period < 0.45) per *= 2;
+  while (per * bg.period > 3.5 && per > 1) per /= 2;
+  const md = S.media[mid].duration, lim = +$('#bmLen').value, end = lim ? Math.min(md, lim) : md;
+  const cuts = [0];
+  for (let i = per; i < bg.times.length; i += per) { const t = bg.times[i]; if (t >= end - 0.4) break; if (t - cuts[cuts.length - 1] > 0.3) cuts.push(t); }
+  cuts.push(end);
+  hist();
+  const aspect = $('#bmAspect').value; if (aspect) { S.set.aspect = aspect; S.set.fit = aspect === '9:16' ? 'cover' : 'contain'; }
+  const pos = {}, mute = $('#bmMute').checked, clips = [];
+  for (let i = 0; i < cuts.length - 1; i++) {
+    const m = S.media[picks[i % picks.length]], len = cuts[i + 1] - cuts[i];
+    const base = { id: uid(), mediaId: m.id, speed: 1, volume: mute ? 0 : 1, br: 1, ct: 1, sat: 1, gray: 0, sepia: 0, hue: 0 };
+    if (m.type === 'image') clips.push({ ...base, in: 0, out: len, zoom: true });
+    else {
+      let p = pos[m.id] != null ? pos[m.id] : m.duration * 0.15;
+      if (p + len > m.duration) p = 0;
+      const ln = Math.min(len, m.duration);
+      clips.push({ ...base, in: p, out: p + ln, zoom: false }); pos[m.id] = p + ln;
+    }
+  }
+  S.clips = clips; S.texts = S.texts.filter(t => !t.autoSub); S.markers = []; S.set.fade = false;
+  S.audios = [{ id: uid(), mediaId: mid, start: 0, in: 0, out: end, volume: 1, fadeIn: false, fadeOut: end < md - 0.1, duck: false, auto: true }];
+  AU.log(`박자에 맞춰 ${clips.length}컷으로 잘라 붙였어요`, 'ok');
+  AU.end(`몽타주 완료 · ${fmt(end)}`);
+}
+
+function runShorts() {
+  const L = layout(); if (!L.length) return toast('먼저 영상을 타임라인에 올리세요');
+  const len = +$('#shLen').value, tot = L[L.length - 1].e, title = $('#shTitle').value.trim();
+  AU.start(); const d = AU.log('말이 가장 많이 몰린 구간 찾는 중');
+  let w0 = 0;
+  if (tot > len) {
+    const step = 0.5, n = Math.ceil(tot / step), sc = new Float32Array(n);
+    for (let i = 0; i < n; i++) {
+      const t = i * step; T = t; const act = L.find(x => t >= x.s && t < x.e);
+      sc[i] = act ? (voiceNow(act) ? 1 : 0.2) : 0;
+      if (S.texts.some(x => !x.autoTitle && t >= x.start && t < x.start + x.dur)) sc[i] += 0.3;
+    }
+    const k = Math.round(len / step); let s = 0, best = -1;
+    for (let i = 0; i < n; i++) { s += sc[i]; if (i >= k) s -= sc[i - k]; if (i >= k - 1 && s > best) { best = s; w0 = (i - k + 1) * step; } }
+    // start on a clip boundary near the window start so the short doesn't open mid-word
+    const near = L.map(x => x.s).filter(s0 => Math.abs(s0 - w0) < 3).sort((a, b) => Math.abs(a - w0) - Math.abs(b - w0))[0];
+    if (near != null) w0 = Math.min(near, tot - len);
+  }
+  const w1 = Math.min(tot, w0 + len);
+  hist();
+  const nc = [];
+  L.forEach(x => {
+    const a = Math.max(x.s, w0), b = Math.min(x.e, w1); if (b - a < 0.05) return;
+    nc.push({ ...x.c, id: a === x.s && b === x.e ? x.c.id : uid(), in: x.c.in + (a - x.s) * x.c.speed, out: x.c.in + (b - x.s) * x.c.speed });
+  });
+  S.clips = nc;
+  S.texts = S.texts.filter(t => !t.autoTitle).map(t => { const a = Math.max(t.start, w0), b = Math.min(t.start + t.dur, w1); return b - a < 0.1 ? null : { ...t, start: a - w0, dur: b - a }; }).filter(Boolean);
+  S.audios = S.audios.map(au => { const l = au.out - au.in, a = Math.max(au.start, w0), b = Math.min(au.start + l, w1); return b - a < 0.1 ? null : { ...au, in: au.in + (a - au.start), out: au.in + (b - au.start), start: a - w0, fadeOut: true }; }).filter(Boolean);
+  S.markers = []; S.set.aspect = '9:16'; S.set.fit = 'cover';
+  S.texts.forEach(t => { if (t.autoSub) t.size = Math.min(t.size, 6.5); });
+  if (title) { const p = { ...TDEF, ...TPRE.info }; delete p.label; S.texts.push({ ...p, id: uid(), text: title, start: 0, dur: w1 - w0, y: 0.13, size: 6.5, anim: 'none', autoTitle: true }); }
+  AU.ok(d, tot > len ? `${fmt(w0)} ~ ${fmt(w1)} 구간을 골랐어요` : '영상 전체를 쇼츠로 바꿨어요');
+  AU.log('9:16 세로 화면으로 꽉 채웠어요', 'ok');
+  AU.end(`쇼츠 완료 · ${fmt(w1 - w0)}`);
+}
+$('#auGo').onclick = () => runAutoEdit().catch(e => { AU.log('오류: ' + e.message, 'err'); $('#auDone').disabled = false; renderAll(); });
+$('#bmGo').onclick = () => runMontage().catch(e => { AU.log('오류: ' + e.message, 'err'); $('#auDone').disabled = false; renderAll(); });
+$('#shGo').onclick = () => { try { runShorts(); } catch (e) { AU.log('오류: ' + e.message, 'err'); $('#auDone').disabled = false; renderAll(); } };
+$('#bAuto').onclick = () => openAuto('one'); $('#bAuto2').onclick = () => openAuto('one');
+
 /* ---------- PROJECT ---------- */
 async function newProject() {
   if (!confirm('지금 프로젝트와 불러온 파일을 모두 지우고 새로 시작할까요?')) return;
@@ -1132,7 +1614,7 @@ try { const t = localStorage.getItem('yt-editor-theme'); if (t) setTheme(t); } c
 
 document.addEventListener('keydown', e => {
   if (e.target.matches('input,textarea,select') || EXP) return;
-  if (!$('#mHelp').hidden || !$('#mExport').hidden) { if (e.key === 'Escape') { $('#mHelp').hidden = true; if (!EXP) $('#mExport').hidden = true; } return; }
+  if (!$('#mHelp').hidden || !$('#mExport').hidden || !$('#mAuto').hidden) { if (e.key === 'Escape') { $('#mHelp').hidden = true; if (!EXP) $('#mExport').hidden = true; if (!$('#auSetup').hidden) $('#mAuto').hidden = true; } return; }
   const mod = e.ctrlKey || e.metaKey, c = e.code;
   if (c === 'Space') { e.preventDefault(); playing ? pause() : play(); }
   else if (mod && c === 'KeyZ') { e.preventDefault(); e.shiftKey ? redo() : undo(); }
