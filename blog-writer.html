@@ -1,0 +1,311 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>블로그 자동 글쓰기</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: 좌측 입력 폼(고정 폭) + 우측 글 미리보기. 좁은 화면에서는 위아래로 쌓임 */
+:root{
+  --bg:#F3F4F2; --surface:#FFFFFF; --ink:#17201F; --ink2:#4C5755; --ink3:#7A8683;
+  --line:#D9DEDB; --accent:#0F6B62; --accent-ink:#FFFFFF; --soft:#E3EFEC; --warn:#9A5B00; --warn-bg:#FBF0DC;
+  --ui:'IBM Plex Sans KR','Noto Sans KR',system-ui,sans-serif; --serif:'Gowun Batang','Noto Serif KR',serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#101514; --surface:#181F1E; --ink:#E8EEEC; --ink2:#9DAAA6; --ink3:#6F7C79;
+  --line:#2A3533; --accent:#4FC3B1; --accent-ink:#06211D; --soft:#1D2B29; --warn:#E0A040; --warn-bg:#2B2313; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#101514; --surface:#181F1E; --ink:#E8EEEC; --ink2:#9DAAA6; --ink3:#6F7C79;
+  --line:#2A3533; --accent:#4FC3B1; --accent-ink:#06211D; --soft:#1D2B29; --warn:#E0A040; --warn-bg:#2B2313; color-scheme:dark}
+*{box-sizing:border-box}
+body{font-family:var(--ui);background:var(--bg);color:var(--ink);font-size:14px;line-height:1.6;
+  padding-block:20px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1120px;margin:0 auto}
+header{margin-bottom:18px}
+h1{font-family:var(--serif);font-size:26px;line-height:1.25;margin:0 0 4px;text-wrap:balance}
+header p{margin:0;color:var(--ink2)}
+.cols{display:grid;grid-template-columns:minmax(0,360px) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:820px){.cols{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px}
+label{display:block;font-size:12px;font-weight:600;color:var(--ink2);margin:0 0 5px}
+.f{margin-bottom:13px}
+input[type=text],textarea,select{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 10px;min-height:40px}
+textarea{resize:vertical;min-height:84px}
+input:focus,textarea:focus,select:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.title-row{display:flex;gap:8px}
+.title-row input{flex:1;min-width:0}
+button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:0 14px;min-height:40px;font-weight:500}
+button:hover:not(:disabled){border-color:var(--accent)}
+button:disabled{opacity:.5;cursor:default}
+button.pri{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+button.sm{min-height:34px;padding:0 11px;font-size:13px}
+.big{width:100%;min-height:46px;font-size:15px;margin-top:4px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{min-height:30px;padding:0 10px;border-radius:15px;font-size:12.5px;background:var(--soft);border-color:transparent;color:var(--ink)}
+.opts{display:flex;flex-direction:column;gap:6px;margin-bottom:6px}
+.opts label{display:flex;gap:8px;align-items:center;font-weight:400;color:var(--ink);margin:0}
+.opts input{accent-color:var(--accent);width:16px;height:16px}
+.hint{font-size:12px;color:var(--ink3);margin:4px 0 0}
+.note{margin-top:10px;font-size:13px;padding:9px 11px;border-radius:8px;background:var(--warn-bg);color:var(--warn)}
+.note[hidden]{display:none}
+.out-head{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-bottom:12px}
+.out-head h2{font-size:13px;font-weight:600;color:var(--ink2);margin:0;letter-spacing:.02em}
+.btns{display:flex;flex-wrap:wrap;gap:6px}
+.stats{font-size:12px;color:var(--ink3)}
+.post{font-family:var(--serif);font-size:16.5px;line-height:1.95;min-height:300px;overflow-wrap:anywhere}
+.post h1{font-size:25px;line-height:1.4;margin:0 0 14px}
+.post h2{font-size:20px;line-height:1.5;margin:28px 0 8px}
+.post h3{font-size:17px;margin:20px 0 6px}
+.post p{margin:0 0 14px}
+.post ul,.post ol{margin:0 0 14px;padding-left:22px}
+.post blockquote{margin:0 0 14px;padding:4px 14px;border-left:3px solid var(--accent);color:var(--ink2)}
+.post hr{border:0;border-top:1px solid var(--line);margin:22px 0}
+.post .ph{display:block;margin:0 0 14px;padding:14px;border:1.5px dashed var(--line);border-radius:8px;color:var(--ink3);font-family:var(--ui);font-size:13px;text-align:center}
+.post .chk{background:var(--warn-bg);color:var(--warn);border-radius:4px;padding:0 4px;font-family:var(--ui);font-size:13px}
+.post .empty{color:var(--ink3);font-family:var(--ui);font-size:14px;line-height:1.7}
+.rev{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.rev input{flex:1;min-width:200px}
+.hist{margin-top:14px}
+.hist h3{font-size:12px;color:var(--ink2);margin:0 0 6px}
+.hist .chip{background:var(--bg);border:1px solid var(--line)}
+@media (prefers-reduced-motion:no-preference){.think{animation:p 1.2s ease-in-out infinite}@keyframes p{50%{opacity:.4}}}
+</style>
+
+</head><body><div class="wrap">
+  <header>
+    <h1>블로그 자동 글쓰기</h1>
+    <p>제목만 넣어도 글이 나와요. 키워드와 말투를 더하면 내 블로그에 맞게 써 줘요.</p>
+  </header>
+
+  <div class="cols">
+    <section class="panel" aria-label="글 설정">
+      <div class="f">
+        <label for="title">글 제목</label>
+        <div class="title-row">
+          <input type="text" id="title" maxlength="80" placeholder="예) 제주 2박 3일 혼자 여행 코스">
+          <button class="sm" id="ideas" title="주제만 있을 때 제목 후보를 받아요">제목 추천</button>
+        </div>
+        <div class="chips" id="ideaChips"></div>
+      </div>
+      <div class="f">
+        <label for="kw">키워드 (쉼표로 구분, 선택)</label>
+        <input type="text" id="kw" maxlength="100" placeholder="제주 혼행, 뚜벅이, 맛집">
+      </div>
+      <div class="f">
+        <label for="memo">꼭 넣고 싶은 내용 (선택)</label>
+        <textarea id="memo" maxlength="1500" placeholder="직접 겪은 일, 가격, 장소 이름, 강조할 점을 적으면 글에 그대로 반영해요"></textarea>
+        <p class="hint">적어 준 내용만 사실로 써요. 없는 숫자나 후기는 지어내지 않아요.</p>
+      </div>
+      <div class="row2">
+        <div class="f"><label for="plat">올릴 곳</label>
+          <select id="plat"><option value="naver">네이버 블로그</option><option value="tistory">티스토리</option><option value="brunch">브런치 (에세이)</option><option value="plain">어디든</option></select></div>
+        <div class="f"><label for="len">길이</label>
+          <select id="len"><option value="800">짧게 (약 800자)</option><option value="1500" selected>보통 (약 1,500자)</option><option value="2500">길게 (약 2,500자)</option></select></div>
+        <div class="f"><label for="tone">말투</label>
+          <select id="tone"><option value="friendly">친근한 ~해요체</option><option value="pro">정보 전달 ~합니다체</option><option value="review">솔직한 후기</option><option value="essay">감성 에세이</option></select></div>
+        <div class="f"><label for="who">읽는 사람</label>
+          <input type="text" id="who" maxlength="40" placeholder="예) 첫 제주 여행자"></div>
+      </div>
+      <div class="opts">
+        <label><input type="checkbox" id="photos" checked>사진 넣을 자리 표시</label>
+        <label><input type="checkbox" id="tags" checked>요약과 해시태그 붙이기</label>
+      </div>
+      <button class="pri big" id="gen">글 써 주세요</button>
+      <div class="note" id="note" hidden></div>
+    </section>
+
+    <section class="panel" aria-label="완성된 글" aria-live="polite">
+      <div class="out-head">
+        <h2>미리보기</h2>
+        <div class="btns">
+          <button class="sm" id="stop" hidden>멈추기</button>
+          <button class="sm pri" id="copy" disabled>글 복사</button>
+          <button class="sm" id="copyMd" disabled>마크다운 복사</button>
+          <button class="sm" id="save" disabled>파일로 저장</button>
+        </div>
+      </div>
+      <div class="stats" id="stats"></div>
+      <article class="post" id="post"><p class="empty">왼쪽에 제목을 넣고 <b>글 써 주세요</b>를 누르면 여기에 글이 나타나요.<br>소제목, 사진 자리, 요약과 태그까지 한 번에 만들어요.</p></article>
+      <div class="rev" id="rev" hidden>
+        <input type="text" id="fb" maxlength="200" placeholder="고치고 싶은 점 예) 더 짧게, 첫 문단을 더 재밌게, 가격 표 넣어줘">
+        <button class="sm pri" id="revise">이대로 고쳐 쓰기</button>
+      </div>
+      <div class="hist" id="hist" hidden><h3>최근에 쓴 글</h3><div class="chips" id="histChips"></div></div>
+    </section>
+  </div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let sample = null, dl = null, ctl = null, turns = [], current = '';
+
+(async () => {
+  try { sample = window.claude && await window.claude.use('sample'); } catch (e) {}
+  try { dl = window.claude && await window.claude.use('downloads'); } catch (e) {}
+  if (!sample) { $('#gen').disabled = true; $('#ideas').disabled = true; showNote('이 화면에서는 글쓰기를 쓸 수 없어요. claude.ai나 Claude 앱에서 이 페이지를 열어 주세요.'); }
+  if (!dl) $('#save').hidden = true;
+  loadHist();
+})();
+
+function showNote(t) { const n = $('#note'); n.textContent = t; n.hidden = !t; }
+const ERR = {
+  not_granted: 'Claude 사용을 허용하지 않아 글을 쓸 수 없어요. 페이지를 새로 열고 허용해 주세요.',
+  rate_limited: '요청이 많아요. 잠시 뒤에 다시 눌러 주세요.',
+  session_expired: '로그인이 만료됐어요. 다시 로그인한 뒤 눌러 주세요.',
+  refused: '이 주제로는 글을 쓸 수 없어요. 제목이나 내용을 바꿔 보세요.',
+  empty_completion: '글이 만들어지지 않았어요. 제목을 조금 더 구체적으로 적어 보세요.',
+  upstream_error: '연결이 잠깐 끊겼어요. 다시 눌러 주세요.',
+  sampling_disabled: '이 계정에서는 Claude를 쓸 수 없어요.'
+};
+
+const PLAT = {
+  naver: '네이버 블로그용. 문단은 2~3문장으로 짧게 끊고, 소제목은 "## "로 쓰고, 이모지는 소제목이나 강조에 가끔만 쓴다.',
+  tistory: '티스토리용. 검색에 잘 걸리도록 제목과 첫 문단에 핵심 키워드를 넣고, 소제목은 "## ", 하위 항목은 "### "로 쓰고, 필요하면 목록을 쓴다.',
+  brunch: '브런치용 에세이. 목록과 이모지는 쓰지 않고, 개인적인 장면으로 시작해서 생각이 깊어지는 흐름으로 쓴다. 소제목은 많아야 2개.',
+  plain: '특정 플랫폼 없이 어디든 올릴 수 있게 쓴다. 소제목은 "## "로 쓴다.'
+};
+const TONE = {
+  friendly: '독자에게 말을 거는 친근한 ~해요체.',
+  pro: '믿음이 가는 정보 전달형 ~합니다체.',
+  review: '장단점을 솔직하게 말하는 후기 말투(~해요체).',
+  essay: '차분하고 감성적인 에세이 문체(~했다 / ~이다).'
+};
+
+function rules(b) {
+  return `당신은 한국어 블로그 글을 대신 써 주는 전문 작가입니다. 아래 조건으로 블로그 글 한 편을 완성해 주세요.
+
+[출력 형식]
+- 첫 줄은 "# 글 제목" (입력한 제목을 바탕으로 클릭하고 싶게 다듬어도 됩니다)
+- 도입 → 본문(소제목 3~5개) → 마무리 순서. 마무리에는 독자에게 건네는 한마디나 질문을 넣습니다.
+${b.photos ? '- 사진이 들어가면 좋은 자리마다 단독 한 줄로 [사진: 무엇을 찍은 사진인지 설명] 을 넣습니다 (3~6곳).\n' : ''}${b.tags ? '- 글 맨 끝에 "---" 줄을 넣고, 그 아래에 "요약: 한 문장" 과 "태그: #태그1 #태그2 ..." (8~10개) 를 씁니다.\n' : ''}- 서론이나 설명 없이 글만 출력합니다. 코드블록을 쓰지 않습니다.
+
+[사실 규칙]
+- 제가 적어 준 내용 말고는 가격, 통계, 영업시간, 주소, 날짜, 인용문, 개인 경험을 지어내지 않습니다.
+- 확인이 필요한 정보가 들어갈 자리에는 "[확인 필요: 무엇]" 이라고 표시합니다.
+- 일반적으로 널리 알려진 상식과 일반적인 조언은 써도 됩니다.
+
+[스타일]
+- ${PLAT[b.plat]}
+- 말투: ${TONE[b.tone]}
+- 분량: 약 ${b.len}자
+- 같은 말을 반복하거나 "오늘은 ~에 대해 알아보겠습니다" 같은 뻔한 도입은 쓰지 않습니다.
+
+[글 정보]
+- 제목(주제): ${b.title}
+${b.kw ? `- 키워드: ${b.kw}\n` : ''}${b.who ? `- 읽는 사람: ${b.who}\n` : ''}${b.memo ? `- 꼭 넣을 내용(제가 직접 적은 사실):\n${b.memo}\n` : ''}`;
+}
+function readForm() {
+  return { title: $('#title').value.trim(), kw: $('#kw').value.trim(), memo: $('#memo').value.trim(), who: $('#who').value.trim(),
+    plat: $('#plat').value, tone: $('#tone').value, len: $('#len').value, photos: $('#photos').checked, tags: $('#tags').checked };
+}
+
+/* ---- tiny safe markdown ---- */
+function inline(s) {
+  return esc(s)
+    .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')
+    .replace(/\[확인 필요[^\]]*\]/g, m => `<span class="chk">${m}</span>`);
+}
+function render(md) {
+  const out = []; let list = null;
+  const close = () => { if (list) { out.push(`</${list}>`); list = null; } };
+  for (const raw of md.split('\n')) {
+    const l = raw.trimEnd(); let m;
+    if (!l.trim()) { close(); continue; }
+    if ((m = l.match(/^\[사진[:：]\s*(.*)\]$/))) { close(); out.push(`<span class="ph">사진 자리 · ${esc(m[1])}</span>`); }
+    else if ((m = l.match(/^(#{1,3})\s+(.*)$/))) { close(); out.push(`<h${m[1].length}>${inline(m[2])}</h${m[1].length}>`); }
+    else if (/^-{3,}$/.test(l.trim())) { close(); out.push('<hr>'); }
+    else if ((m = l.match(/^\s*[-*•]\s+(.*)$/))) { if (list !== 'ul') { close(); out.push('<ul>'); list = 'ul'; } out.push(`<li>${inline(m[1])}</li>`); }
+    else if ((m = l.match(/^\s*\d+[.)]\s+(.*)$/))) { if (list !== 'ol') { close(); out.push('<ol>'); list = 'ol'; } out.push(`<li>${inline(m[1])}</li>`); }
+    else if ((m = l.match(/^>\s?(.*)$/))) { close(); out.push(`<blockquote>${inline(m[1])}</blockquote>`); }
+    else { close(); out.push(`<p>${inline(l)}</p>`); }
+  }
+  close(); return out.join('');
+}
+function plain(md) {
+  return md.replace(/^#{1,3}\s+/gm, '').replace(/\*\*([^*]+)\*\*/g, '$1').replace(/^\s*[-*•]\s+/gm, '· ').replace(/^-{3,}$/gm, '').replace(/\n{3,}/g, '\n\n').trim();
+}
+function show(text, busy) {
+  current = text; $('#post').innerHTML = render(text);
+  const body = text.split(/\n---\n/)[0], chars = body.replace(/\s|\[사진[^\]]*\]|[#*]/g, '').length;
+  $('#stats').textContent = text ? `공백 제외 약 ${chars.toLocaleString('ko-KR')}자${busy ? ' · 쓰는 중' : ''}` : '';
+}
+function setBusy(b) {
+  $('#gen').disabled = b || !sample; $('#revise').disabled = b; $('#stop').hidden = !b;
+  ['copy', 'copyMd', 'save'].forEach(id => $('#' + id).disabled = b || !current);
+  $('#rev').hidden = b || !current;
+}
+
+async function run(input, isRevise) {
+  ctl = new AbortController(); showNote(''); setBusy(true);
+  if (!isRevise) { current = ''; $('#post').innerHTML = '<p class="empty think">글감을 정리하고 있어요. 길게는 1분쯤 걸려요…</p>'; $('#stats').textContent = ''; }
+  else $('#stats').textContent = '고쳐 쓰는 중…';
+  try {
+    const { text, truncated } = await sample(input, { cache: false, signal: ctl.signal, onText: ({ text }) => show(text, true) });
+    turns = [...input, { role: 'assistant', content: text }]; show(text, false);
+    if (truncated) showNote('글이 길어서 중간에 끊겼어요. 길이를 줄이거나 "이어서 마무리해 줘"로 고쳐 쓰기를 눌러 보세요.');
+    saveHist(text);
+  } catch (e) {
+    if (e && e.text) { show(e.text, false); showNote('쓰다가 멈췄어요. 여기까지 나온 글이에요.'); }
+    else if (!isRevise) { current = ''; $('#post').innerHTML = '<p class="empty">아직 글이 없어요.</p>'; }
+    if (e && e.code !== 'cancelled') showNote(ERR[e.code] || '글을 만들지 못했어요. 잠시 뒤에 다시 해 보세요.');
+    if (isRevise) show(current, false);
+  } finally { setBusy(false); ctl = null; }
+}
+
+$('#gen').onclick = () => {
+  const b = readForm();
+  if (!b.title) { showNote('글 제목이나 주제를 먼저 적어 주세요.'); $('#title').focus(); return; }
+  run([{ role: 'user', content: rules(b) }], false);
+};
+$('#revise').onclick = () => {
+  const fb = $('#fb').value.trim(); if (!fb || !turns.length) return;
+  $('#fb').value = '';
+  run([...turns, { role: 'user', content: `이 글을 다음 요청대로 고쳐서, 처음부터 끝까지 완성본 전체를 다시 출력해 주세요. 출력 형식과 사실 규칙은 그대로 지킵니다.\n요청: ${fb}` }], true);
+};
+$('#fb').addEventListener('keydown', e => { if (e.key === 'Enter') $('#revise').click(); });
+$('#stop').onclick = () => ctl && ctl.abort();
+
+$('#ideas').onclick = async () => {
+  const b = readForm(), seed = b.title || b.memo || b.kw;
+  if (!seed) { showNote('제목 추천은 주제를 한 줄이라도 적어야 받을 수 있어요. 제목, 키워드, 내용 중 하나를 적어 주세요.'); return; }
+  $('#ideas').disabled = true; showNote('');
+  try {
+    const list = await sample.json(`다음 주제로 블로그 글 제목 후보 6개를 만들어 주세요. 클릭하고 싶지만 과장하거나 낚시하지 않는 한국어 제목, 서로 다른 각도로. JSON 문자열 배열만 출력하세요.\n예: ["제목1","제목2"]\n\n주제: ${seed}\n키워드: ${b.kw || '없음'}\n올릴 곳: ${$('#plat').selectedOptions[0].text}`, { modelTier: 'quick' });
+    const box = $('#ideaChips'); box.textContent = '';
+    (Array.isArray(list) ? list : []).slice(0, 6).forEach(t => {
+      const c = document.createElement('button'); c.className = 'chip'; c.textContent = String(t);
+      c.onclick = () => { $('#title').value = String(t); box.textContent = ''; }; box.appendChild(c);
+    });
+  } catch (e) { showNote(ERR[e && e.code] || '제목을 받지 못했어요. 다시 눌러 주세요.'); }
+  finally { $('#ideas').disabled = !sample; }
+};
+
+/* ---- copy / save ---- */
+function copy(txt, msg) {
+  const ok = () => { $('#stats').textContent = msg; };
+  const fb = () => { const ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); ok(); } catch (e) { $('#stats').textContent = '복사하지 못했어요. 글을 직접 드래그해서 복사해 주세요.'; } ta.remove(); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(ok, fb); else fb();
+}
+$('#copy').onclick = () => copy(plain(current), '복사했어요. 블로그 글쓰기 창에 붙여 넣으세요.');
+$('#copyMd').onclick = () => copy(current, '마크다운으로 복사했어요. 티스토리 마크다운 모드에 붙여 넣으세요.');
+$('#save').onclick = async () => {
+  const name = ((current.match(/^#\s+(.+)$/m) || [])[1] || $('#title').value || '블로그글').replace(/[\\/:*?"<>|]+/g, '_').slice(0, 60);
+  try { await dl.save({ filename: name + '.md', data: current }); $('#stats').textContent = '저장했어요.'; }
+  catch (e) { if (!e || e.code !== 'declined') $('#stats').textContent = '저장하지 못했어요. 복사 버튼을 써 주세요.'; }
+};
+
+/* ---- recent posts (this browser only) ---- */
+function histGet() { try { return JSON.parse(localStorage.getItem('blog-writer-hist') || '[]'); } catch (e) { return []; } }
+function saveHist(text) {
+  const t = (text.match(/^#\s+(.+)$/m) || [])[1] || $('#title').value || '제목 없음';
+  try { const h = histGet().filter(x => x.t !== t); h.unshift({ t, text }); localStorage.setItem('blog-writer-hist', JSON.stringify(h.slice(0, 8))); } catch (e) {}
+  loadHist();
+}
+function loadHist() {
+  const h = histGet(), box = $('#histChips'); box.textContent = ''; $('#hist').hidden = !h.length;
+  h.forEach(x => { const c = document.createElement('button'); c.className = 'chip'; c.textContent = x.t.slice(0, 28);
+    c.onclick = () => { turns = [{ role: 'user', content: rules(readForm()) }, { role: 'assistant', content: x.text }]; show(x.text, false); setBusy(false); showNote(''); };
+    box.appendChild(c); });
+}
+</script>
+</body></html>
